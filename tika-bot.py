@@ -1,5 +1,5 @@
 #! /usr/bin/env python
-# vim: set fileencoding=utf-8 :
+# vim: set fileencoding=utf-8 sw=4 sts=4 expandtab:
 #
 # Simple IRC bot to receive notifications through XML-RCP and display them in a
 # channel.

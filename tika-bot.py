@@ -27,6 +27,7 @@ import irc.bot
 from irc.client import irc_lower, ip_numstr_to_quad, ip_quad_to_numstr
 
 import xmlrpc
+import optparse
 
 class TikaBot(irc.bot.SingleServerIRCBot):
     def __init__(self, channel, nickname, server, port=6667):
@@ -76,12 +77,18 @@ class TikaBot(irc.bot.SingleServerIRCBot):
         self.connection.privmsg(self.channel, s)
 
 def main():
-    import sys
-    if len(sys.argv) != 4:
-        print "Usage: python tika-bot.py <server[:port]> <channel> <nickname>"
-        sys.exit(1)
+    parser = optparse.OptionParser(usage="usage: %prog [options] server[:port] channel")
 
-    s = sys.argv[1].split(":", 1)
+    parser.add_option("--nick", action="store", dest="nick",
+                      help="the IRC nick to use (default: %default)",
+                      default="tika-bot")
+
+    (options, args) = parser.parse_args()
+
+    if len(args) != 2:
+        parser.error("Not enough arguments provided")
+
+    s = args[0].split(":", 1)
     server = s[0]
     if len(s) == 2:
         try:
@@ -91,10 +98,9 @@ def main():
             sys.exit(1)
     else:
         port = 6667
-    channel = sys.argv[2]
-    nickname = sys.argv[3]
+    channel = args[1]
 
-    bot = TikaBot(channel, nickname, server, port)
+    bot = TikaBot(channel, options.nick, server, port)
 
     # This spawns a new thread (that will automatically quit when the
     # main thread quits). Note that no attempt is made to do locking at this

@@ -84,6 +84,9 @@ def main():
                       help="the IRC nick to use (default: %default)",
                       default="tika-bot")
 
+    parser.add_option("-f", "--foreground", action="store_true", dest="foreground",
+                      help="don't daemonize, run in the foreground instead")
+
     (options, args) = parser.parse_args()
 
     if len(args) != 2:
@@ -112,10 +115,14 @@ def main():
     rpc.daemon = True
     rpc.start()
 
-    # Daemonize
-    with daemon.DaemonContext():
-        # This never returns
+    if options.foreground:
         bot.start()
+    else:
+        # Daemonize
+        with daemon.DaemonContext():
+            bot.start()
+
+    # bot.start() never returns
 
 if __name__ == "__main__":
     main()

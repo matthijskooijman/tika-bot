@@ -27,6 +27,7 @@ import irc.bot
 from irc.client import irc_lower, ip_numstr_to_quad, ip_quad_to_numstr
 
 import xmlrpc
+import daemon
 import optparse
 
 class TikaBot(irc.bot.SingleServerIRCBot):
@@ -111,8 +112,10 @@ def main():
     rpc.daemon = True
     rpc.start()
 
-    # This never returns
-    bot.start()
+    # Daemonize
+    with daemon.DaemonContext():
+        # This never returns
+        bot.start()
 
 if __name__ == "__main__":
     main()

@@ -26,6 +26,8 @@ The known commands are:
 import irc.bot
 from irc.client import irc_lower, ip_numstr_to_quad, ip_quad_to_numstr
 
+import pwd
+import grp
 import xmlrpc
 import daemon
 import optparse
@@ -87,6 +89,12 @@ def main():
     parser.add_option("-f", "--foreground", action="store_true", dest="foreground",
                       help="don't daemonize, run in the foreground instead")
 
+    parser.add_option("-u", "--user", action="store", dest="user",
+                      help="the user to run as (default: the current user)")
+
+    parser.add_option("-g", "--group", action="store", dest="group",
+                      help="the group to run as (default: the primary group of the user passed to --user, or the current group if --user is not given)")
+
     (options, args) = parser.parse_args()
 
     if len(args) != 2:
@@ -104,6 +112,22 @@ def main():
         port = 6667
     channel = args[1]
 
+    uid = None
+    gid = None
+    if options.user:
+        try:
+            entry = pwd.getpwnam(options.user)
+            uid = entry.pw_uid
+            gid = entry.pw_gid
+        except KeyError, e:
+            parser.error("User not found: %s" % options.user)
+    if options.group:
+        try:
+            gid = grp.getgrnam(options.group).gr_gid
+        except KeyError, e:
+            parser.error("Group not found: %s" % options.group)
+
+
     bot = TikaBot(channel, options.nick, server, port)
 
     # This spawns a new thread (that will automatically quit when the
@@ -119,7 +143,7 @@ def main():
         bot.start()
     else:
         # Daemonize
-        with daemon.DaemonContext():
+        with daemon.DaemonContext(uid=uid, gid=gid):
             bot.start()
 
     # bot.start() never returns

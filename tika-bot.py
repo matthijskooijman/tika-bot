@@ -120,6 +120,11 @@ def main():
         port = 6667
     channel = args[1]
 
+    if options.foreground and options.use_pidfile:
+            parser.error("--use-pidfile is not supported with --foreground")
+    if options.foreground and (options.user or options.group):
+            parser.error("--user and --group are not supported with --foreground")
+
     uid = None
     gid = None
     if options.user:

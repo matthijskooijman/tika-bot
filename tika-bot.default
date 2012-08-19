@@ -1,0 +1,17 @@
+# Copy this file to /etc/default/tika-bot and configure it
+
+# The location of the daemon
+DAEMON=/data/applications/tika-bot/tika-bot.py
+
+# The server to connect to
+SERVER=irc.xs4all.nl
+
+# The channel to join
+CHANNEL="#tika"
+
+# The user/group to run as
+USER="tika-bot"
+GROUP="tika-bot"
+
+# Any extra arguments to pass
+DAEMON_ARGS=""

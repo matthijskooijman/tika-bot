@@ -1,0 +1,76 @@
+#! /bin/sh
+### BEGIN INIT INFO
+# Provides:          tika-bot
+# Required-Start:    $network
+# Required-Stop:     $network
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Tika IRC bot
+# Description:       Simple IRC bot to receive notifications through XML-RCP
+#                    and display them in a channel.
+### END INIT INFO
+
+#
+# Author: Matthijs Kooijman <matthijs@stdin.nl>
+#
+
+# PATH should only include /usr/* if it runs after the mountnfs.sh script
+PATH=/sbin:/usr/sbin:/bin:/usr/bin
+NAME=tika-bot
+DESC="Tika IRC bot"
+
+# The pidfile to use
+RUNDIR="/var/run/$NAME"
+PIDFILE="$RUNDIR/$NAME.pid"
+
+# This sets a bunch of options
+. "/etc/default/$NAME"
+
+DAEMON_ARGS="$DAEMON_ARGS --use-pidfile --pidfile=$PIDFILE --user=$USER --group=$GROUP $SERVER $CHANNEL"
+
+# Define LSB log_* functions.
+. /lib/lsb/init-functions
+
+case "$1" in
+  start)
+	log_daemon_msg "Starting $DESC" "$NAME"
+	if [ -r "$PIDFILE" ]; then
+		if pidofproc -p "$PIDFILE" "$DAEMON"; then
+			# Still running
+			log_failure_msg "$NAME already running?"
+			exit 1
+		else
+			# Remove stale pidfile and any lock files lying around
+			rm "$RUNDIR"/*
+		fi
+	fi
+
+	# Pre-create a directory for the pidfile, to prevent permission
+	# problems
+	test -e "$RUNDIR" || install -m 755 -o "$USER" -g "$GROUP" -d "$RUNDIR"
+
+	# Start the daemon
+        start_daemon -p "$PIDFILE" "$DAEMON" $DAEMON_ARGS
+	log_end_msg $?
+
+	;;
+  stop)
+	log_daemon_msg "Stopping $DESC" "$NAME"
+        killproc -p "$PIDFILE" "$DAEMON"
+	log_end_msg $?
+
+	;;
+  reload|force-reload|restart)
+	$0 stop
+	$0 start
+	;;
+  status)
+	status_of_proc -p "$PIDFILE" "$DAEMON" "$NAME" && exit 0 || exit $?
+	;;
+  *)
+	echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload|status}" >&2
+	exit 3
+	;;
+esac
+
+:

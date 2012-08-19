@@ -30,6 +30,7 @@ import pwd
 import grp
 import xmlrpc
 import daemon
+import daemon.pidlockfile
 import optparse
 
 class TikaBot(irc.bot.SingleServerIRCBot):
@@ -95,6 +96,13 @@ def main():
     parser.add_option("-g", "--group", action="store", dest="group",
                       help="the group to run as (default: the primary group of the user passed to --user, or the current group if --user is not given)")
 
+    parser.add_option("-p", "--use-pidfile", action="store_true", dest="use_pidfile",
+                      help="create a pidfile on startup on remove it again on shutdown")
+
+    parser.add_option("--pidfile", action="store", dest="pidfile",
+                      metavar="FILE", default="/var/run/tika-bot.pid",
+                      help="the location of the pidfile")
+
     (options, args) = parser.parse_args()
 
     if len(args) != 2:
@@ -142,8 +150,13 @@ def main():
     if options.foreground:
         bot.start()
     else:
+        if options.use_pidfile:
+            pidcontext = daemon.pidlockfile.PIDLockFile(options.pidfile)    
+        else:
+            pidcontext = None
+
         # Daemonize
-        with daemon.DaemonContext(uid=uid, gid=gid):
+        with daemon.DaemonContext(uid=uid, gid=gid, pidfile=pidcontext):
             bot.start()
 
     # bot.start() never returns

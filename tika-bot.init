@@ -3,6 +3,7 @@
 # Provides:          tika-bot
 # Required-Start:    $network
 # Required-Stop:     $network
+# Should-Start:      nslcd
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Tika IRC bot

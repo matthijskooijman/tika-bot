@@ -150,9 +150,9 @@ def main():
     # likely is that?
     rpc = xmlrpc.XMLRPC(bot)
     rpc.daemon = True
-    rpc.start()
 
     if options.foreground:
+        rpc.start()
         bot.start()
     else:
         if options.use_pidfile:
@@ -162,6 +162,7 @@ def main():
 
         # Daemonize
         with daemon.DaemonContext(uid=uid, gid=gid, pidfile=pidcontext):
+            rpc.start()
             bot.start()
 
     # bot.start() never returns

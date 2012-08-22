@@ -125,18 +125,18 @@ def main():
     if options.foreground and (options.user or options.group):
             parser.error("--user and --group are not supported with --foreground")
 
-    uid = None
-    gid = None
+    dc = daemon.DaemonContext()
+
     if options.user:
         try:
             entry = pwd.getpwnam(options.user)
-            uid = entry.pw_uid
-            gid = entry.pw_gid
+            dc.uid = entry.pw_uid
+            dc.gid = entry.pw_gid
         except KeyError, e:
             parser.error("User not found: %s" % options.user)
     if options.group:
         try:
-            gid = grp.getgrnam(options.group).gr_gid
+            dc.gid = grp.getgrnam(options.group).gr_gid
         except KeyError, e:
             parser.error("Group not found: %s" % options.group)
 
@@ -156,12 +156,10 @@ def main():
         bot.start()
     else:
         if options.use_pidfile:
-            pidcontext = daemon.pidlockfile.PIDLockFile(options.pidfile)    
-        else:
-            pidcontext = None
+            dc.pidfile = daemon.pidlockfile.PIDLockFile(options.pidfile)
 
         # Daemonize
-        with daemon.DaemonContext(uid=uid, gid=gid, pidfile=pidcontext):
+        with dc:
             rpc.start()
             bot.start()
 

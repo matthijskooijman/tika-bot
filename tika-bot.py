@@ -26,6 +26,7 @@ The known commands are:
 import irc.bot
 from irc.client import irc_lower, ip_numstr_to_quad, ip_quad_to_numstr
 
+import sys
 import pwd
 import grp
 import xmlrpc
@@ -120,11 +121,6 @@ def main():
         port = 6667
     channel = args[1]
 
-    if options.foreground and options.use_pidfile:
-            parser.error("--use-pidfile is not supported with --foreground")
-    if options.foreground and (options.user or options.group):
-            parser.error("--user and --group are not supported with --foreground")
-
     dc = daemon.DaemonContext()
 
     if options.user:
@@ -152,18 +148,22 @@ def main():
     rpc.daemon = True
 
     if options.foreground:
+        # Don't detach
+        dc.detach_process = False
+
+        # Don't redirect streams
+        dc.stdout = sys.stdout
+        dc.stderr = sys.stderr
+        dc.stdin = sys.stdin
+
+
+    if options.use_pidfile:
+        dc.pidfile = daemon.pidlockfile.PIDLockFile(options.pidfile)
+
+    with dc:
         rpc.start()
+        # bot.start() never returns
         bot.start()
-    else:
-        if options.use_pidfile:
-            dc.pidfile = daemon.pidlockfile.PIDLockFile(options.pidfile)
-
-        # Daemonize
-        with dc:
-            rpc.start()
-            bot.start()
-
-    # bot.start() never returns
 
 if __name__ == "__main__":
     main()

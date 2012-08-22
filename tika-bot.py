@@ -88,8 +88,8 @@ def main():
                       help="the IRC nick to use (default: %default)",
                       default="tika-bot")
 
-    parser.add_option("-f", "--foreground", action="store_true", dest="foreground",
-                      help="don't daemonize, run in the foreground instead")
+    parser.add_option("-d", "--daemon", action="store_true", dest="daemon",
+                      help="daemonize on startup, running in the background")
 
     parser.add_option("-u", "--user", action="store", dest="user",
                       help="the user to run as (default: the current user)")
@@ -140,7 +140,7 @@ def main():
     bot = TikaBot(channel, options.nick, server, port)
 
 
-    if options.foreground:
+    if not options.daemon:
         # Don't detach
         dc.detach_process = False
 

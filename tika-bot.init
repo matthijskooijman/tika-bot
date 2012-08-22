@@ -27,7 +27,7 @@ PIDFILE="$RUNDIR/$NAME.pid"
 # This sets a bunch of options
 . "/etc/default/$NAME"
 
-DAEMON_ARGS="$DAEMON_ARGS --use-pidfile --pidfile=$PIDFILE --user=$USER --group=$GROUP $SERVER $CHANNEL"
+DAEMON_ARGS="$DAEMON_ARGS --daemon --use-pidfile --pidfile=$PIDFILE --user=$USER --group=$GROUP $SERVER $CHANNEL"
 
 # Define LSB log_* functions.
 . /lib/lsb/init-functions

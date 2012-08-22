@@ -139,13 +139,6 @@ def main():
 
     bot = TikaBot(channel, options.nick, server, port)
 
-    # This spawns a new thread (that will automatically quit when the
-    # main thread quits). Note that no attempt is made to do locking at this
-    # moment, so it seems there's a chance that both threads are going to send
-    # a command at the same time, with all kinds of odd side effects. But, how
-    # likely is that?
-    rpc = xmlrpc.XMLRPC(bot)
-    rpc.daemon = True
 
     if options.foreground:
         # Don't detach
@@ -161,7 +154,15 @@ def main():
         dc.pidfile = daemon.pidlockfile.PIDLockFile(options.pidfile)
 
     with dc:
+        # This spawns a new thread (that will automatically quit when the
+        # main thread quits). Note that no attempt is made to do locking at this
+        # moment, so it seems there's a chance that both threads are going to send
+        # a command at the same time, with all kinds of odd side effects. But, how
+        # likely is that?
+        rpc = xmlrpc.XMLRPC(bot)
+        rpc.daemon = True
         rpc.start()
+
         # bot.start() never returns
         bot.start()
 
